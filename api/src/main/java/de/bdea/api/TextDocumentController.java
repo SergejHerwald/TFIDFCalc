@@ -29,9 +29,11 @@ public class TextDocumentController {
 	public boolean addTextDocument(
 			@RequestParam("file") MultipartFile file){
 		
-		//return value has to be changed HashMap<String, Integer>
+		//return value has to be changed to HashMap<String, Integer>
 		
 		try {
+			
+		
 			
 			InputStream stream = file.getInputStream();
 			InputStreamReader isReader = new InputStreamReader(stream);
@@ -41,21 +43,18 @@ public class TextDocumentController {
 		    while((str = reader.readLine())!= null){
 		    	sb.append(str);
 		    }
-		    System.out.println(sb.toString());
-		    
 
+			String [] strs = sb.toString().split(" ");
+			for(String string : strs) {
+				System.out.println(string);
+			}
+		    
+			//Throws java.lang.reflect.InaccessibleObjectException
 //			SparkConf conf = new SparkConf().setAppName("word counter").setMaster("local[*]");
-//			JavaSparkContext sc = new JavaSparkContext(conf);
-		    
-//			String [] strs = sb.toString().split(" ");
-//			for(String string : strs) {
-//				System.out.println(string);
-//			}
+//			JavaSparkContext sc = new JavaSparkContext(conf);  	
+			
 //			JavaRDD<String> rdd = sc.parallelize(Arrays.asList(strs));
-		    
-		    
-			
-			
+		    	
 			
 		} catch (IOException e) {
 			e.printStackTrace();

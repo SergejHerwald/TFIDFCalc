@@ -22,9 +22,7 @@ export class FileuploaderComponent implements OnInit {
 
     })
   }
-
-
-
+  
   onUpload() {
     this.fileuploaderService.upload(this.file, this.form.value.name).subscribe(()=>{
 
