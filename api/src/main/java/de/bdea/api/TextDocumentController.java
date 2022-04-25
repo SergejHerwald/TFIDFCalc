@@ -27,15 +27,11 @@ public class TextDocumentController {
 
 	@PostMapping("/uploadFile")
 	public boolean addTextDocument(
-			@RequestParam("file") MultipartFile file,
-			@RequestParam("name") String name){
+			@RequestParam("file") MultipartFile file){
 		
 		//return value has to be changed HashMap<String, Integer>
 		
 		try {
-			
-			SparkConf conf = new SparkConf().setAppName("word counter").setMaster("local[*]");
-			JavaSparkContext sc = new JavaSparkContext(conf);
 			
 			InputStream stream = file.getInputStream();
 			InputStreamReader isReader = new InputStreamReader(stream);
@@ -45,10 +41,19 @@ public class TextDocumentController {
 		    while((str = reader.readLine())!= null){
 		    	sb.append(str);
 		    }
-			String [] strs = sb.toString().split(" ");
-			JavaRDD<String> rdd = sc.parallelize(Arrays.asList(strs));
-			
-			
+		    System.out.println(sb.toString());
+		    
+
+//			SparkConf conf = new SparkConf().setAppName("word counter").setMaster("local[*]");
+//			JavaSparkContext sc = new JavaSparkContext(conf);
+		    
+//			String [] strs = sb.toString().split(" ");
+//			for(String string : strs) {
+//				System.out.println(string);
+//			}
+//			JavaRDD<String> rdd = sc.parallelize(Arrays.asList(strs));
+		    
+		    
 			
 			
 			
@@ -56,16 +61,7 @@ public class TextDocumentController {
 			e.printStackTrace();
 		}
 		
-		
-
-		
-
-
-//		
-//		long cnt = text.filter(line -> line.contains("Liebe")).count();
-//		
-//		System.out.println(cnt + " Zeilen mit 'Liebe' in " + pfad);
-//		sc.close();
+	
 		
 		return true;	
 	}
