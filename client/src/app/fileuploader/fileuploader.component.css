@@ -1,0 +1,27 @@
+mat-card{
+  width: 500px;
+  margin: 100px auto;
+}
+
+#header {
+  text-align: center;
+}
+
+#submitButton {
+  margin-top: 10px;
+  width: 100%;
+  background-color: rgb(0,31,91);
+}
+
+#submitButton:disabled {
+  background-color: grey;
+}
+
+.full-width-input {
+  width: 100%;
+}
+
+
+
+
+
