@@ -11,9 +11,17 @@ export class FileuploaderService {
 
   apiPath:string = "http://localhost:8080"
 
-  upload(file:File,name:string):Observable<{uploaded: boolean}> {
+  upload(file:File):Observable<{uploaded: boolean}> {
     const formData: FormData = new FormData();
     formData.append('file', file);
     return this.http.post<{uploaded: boolean}>(`${this.apiPath}/uploadFile`, formData)
+  }
+
+  getFiles():Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiPath}/getFiles`)
+  }
+
+  startBatchWork():Observable<any> {
+    return this.http.get<any>(`${this.apiPath}/startBatchWork`)
   }
 }

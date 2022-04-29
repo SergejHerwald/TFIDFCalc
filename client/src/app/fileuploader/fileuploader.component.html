@@ -1,34 +1,94 @@
-<mat-card>
-
-  <form [formGroup]="this.form" (ngSubmit)="onUpload()">
-
-    <div id="header">
-      <h2>Upload form</h2>
-    </div>
-
-    <mat-dialog-content>
-
-
-      <mat-form-field class="full-width-input">
-        <mat-label>Enter the name of the file</mat-label>
-        <input matInput type="text" placeholder="Password" class="input-item full-width-input" formControlName="name">
-      </mat-form-field>
 
 
 
-      <input type="file" class="input-item" (change)="onSelected($event)" formControlName="file">
+
+
+  <mat-card id="upload-mat-card">
+
+    <form [formGroup]="this.uploadform" (ngSubmit)="onUpload()">
+      <div class="header">
+        <h2>Upload form</h2>
+      </div>
+
+      <mat-dialog-content>
+        <input type="file" class="input-item" (change)="onSelected($event)" formControlName="file">
+      </mat-dialog-content>
+
+      <mat-dialog-actions>
+        <button
+          mat-raised-button
+          color="primary"
+          class="button"
+          [disabled]="!this.uploadFormValid">
+
+          <div *ngIf="!this.uploadStarted;else uploadElse">
+            UPLOAD
+          </div>
+
+          <ng-template #uploadElse>
+            <mat-spinner diameter="40" value="200"></mat-spinner>
+          </ng-template>
+
+        </button>
+      </mat-dialog-actions>
+    </form>
+  </mat-card>
 
 
 
-    </mat-dialog-content>
+  <mat-card id="files-mat-card">
+    <form [formGroup]="this.getCloudform" (ngSubmit)="getImage()">
+      <div class="header">
+        <h2>Tag Cloud</h2>
+      </div>
 
-    <mat-dialog-actions>
-      <button mat-raised-button color="primary" id="submitButton" [disabled]="!this.form.valid">UPLOAD</button>
-    </mat-dialog-actions>
+      <mat-dialog-content>
+        <mat-form-field appearance="fill" class="full-width-input">
+          <mat-label>Select file</mat-label>
+          <mat-select [(value)]="fileSelected" formControlName="file">
+            <mat-option *ngFor="let file of files" [value]="file">{{file}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </mat-dialog-content>
 
-  </form>
+      <mat-dialog-actions>
+        <button
+          mat-raised-button
+          color="primary"
+          class="button"
+          [disabled]="!this.fileSelected"
+        >
+          GET CLOUD</button>
+      </mat-dialog-actions>
 
-</mat-card>
+    </form>
+
+    <button
+      mat-raised-button color="primary"
+      class="button"
+      [disabled]="!this.batchWorkValid"
+      (click)="startBatchWork()"
+    >
+      <div *ngIf="!this.workStarted;else batchElse">
+        START BATCH WORK
+      </div>
+
+      <ng-template #batchElse>
+        <mat-spinner diameter="40" value="200"></mat-spinner>
+      </ng-template>
+    </button>
+  </mat-card>
+
+
+  <div class="flex">
+    <img [src]="this.url" *ngIf="this.imageLoaded">
+  </div>
+
+
+
+
+
+
 
 
 

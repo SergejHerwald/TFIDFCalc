@@ -15,33 +15,37 @@ import {MatSelectModule} from "@angular/material/select";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {FileuploaderService} from "./fileuploader/fileuploader.service";
 import {HttpClient, HttpClientModule} from "@angular/common/http";
+import {MatSnackBarModule} from "@angular/material/snack-bar";
+import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 
 @NgModule({
   declarations: [
     AppComponent,
     FileuploaderComponent
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    BrowserAnimationsModule,
-    MatCardModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatInputModule,
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        BrowserAnimationsModule,
+        MatCardModule,
+        ReactiveFormsModule,
+        MatDialogModule,
+        MatInputModule,
 
-    CommonModule,
-    MatIconModule,
+        CommonModule,
+        MatIconModule,
 
-    HttpClientModule,
-
-
-    MatSelectModule,
-    MatFormFieldModule,
-    MatButtonModule
+        HttpClientModule,
 
 
-  ],
+        MatSelectModule,
+        MatFormFieldModule,
+        MatButtonModule,
+
+        MatSnackBarModule,
+        MatProgressSpinnerModule
+
+    ],
   providers: [
     FileuploaderService
   ],

@@ -1,0 +1,112 @@
+
+
+Selectors: .(class), #(id), <tag>(tag), <tag style="...">
+
+color: rgba(255,255,255,1)
+
+text-aligt: center, left, right
+font-weight: bold, 100
+font-style: italic
+text-decoration: underline, line-through
+font-size: 10px, 
+
+backgroud-color: green
+
+
+
+----------------------------box-model----------------------------
+margin, border, padding
+width, height
+
+blocks sind gierig // display: block
+
+box-sizing: content-box | border-box
+* {
+    box-sizing: border-box;
+}
+
+
+inline blocke sind nicht gierig, sie nehmen nur so viel Platz, wie viel sie brauchen
+margin nur links und left, width funktioniert nicht,  padding ist ok 
+display: inline;
+
+
+display: inline-block // padding und margin von block, Gier von inline
+-----------------------------------------------------------------
+
+
+
+--------------------Bild horisontal zentriren--------------------
+img {
+    display: block;
+    width: 300px;
+    margin: 0 auto; // nur horisontal zentriren
+}
+
+----------Elemente anders positionieren----------
+nav {
+    position: static; // default
+}
+
+nav {
+    position: relative; // relative
+    left: 30px // nach rechts verschieben
+    top: 150px // nach untern
+    bottom:
+    right:
+}
+
+nav {
+    position: absolute; // da wo wir möchten
+    right: 0px // ganz rechts
+    top: 0px // ganz oben
+} // absolute Positionierung funktioniert nur in Elementen mit relativer Positionierung!!!!
+
+nav {
+    position: fixed // bewegt sich beim Scrollen nicht
+}
+
+nav {
+    position: inherit // erbt Positionierung von Vaterknoten
+}
+
+Wenn sich Elemente bei der absolüten Positionierung überlappen, wird das Element angezeigt, das eine höhere z-index hat
+Absoulute Positionierung gewinnt Relative immer, egal wie hoch Index ist. Ist allerdings mit z-index: -1 zu fixen.
+
+----------Vertikal zentrieren----------
+
+vertical-align // Positionierung vertikal, funktioniert nur mit inline-block Elementen
+vertical-align: top | middle | ...
+
+----------Textumfluss----------
+img {
+   float: left; // Textumfluss rechts
+}
+
+----------Maßeinheiten----------
+% - in % von Vatergröße
+px - Pixel
+em - hängt von der Schriftart ab
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

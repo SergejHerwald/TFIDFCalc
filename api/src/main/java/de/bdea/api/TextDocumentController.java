@@ -20,6 +20,7 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -57,7 +58,9 @@ public class TextDocumentController {
             //
             //Going trough a text Data and filtering all words with less then 4 letters
             //
-            SparkConf conf = new SparkConf().setAppName("xy").setMaster("local[4]");
+            SparkConf conf = new SparkConf().setMaster("local[*]").setAppName("xy");
+            //SparkConf conf = SparkSession.builder().appName("ANewUnitTest").master("local").getOrCreate();
+            
             JavaSparkContext sc = new JavaSparkContext(conf);
 
 
@@ -133,5 +136,23 @@ public class TextDocumentController {
         wordCloud.writeToFile(image.getPath());
         //System.out.print(wordFrequencies);
     }
+    
+    @GetMapping("/getFiles")
+    public String[] getFiles() {
+    	String[] strs = {"1","2","3","4"}; // has to be replaced with real names of files
+		return strs; 	
+    }
+    
+    @GetMapping("/startBatchWork")
+    public void startBatchWork() {
+    	System.out.println("Batchwork started!!");
+    	try {
+			Thread.sleep(4000);  // only for test
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+    	// TODO: Implementaion of batch work
+    }
+
 
 }

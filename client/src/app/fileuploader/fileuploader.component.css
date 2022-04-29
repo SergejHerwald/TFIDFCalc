@@ -1,13 +1,19 @@
-mat-card{
+
+#upload-mat-card{
   width: 500px;
-  margin: 100px auto;
+  margin: 50px auto 0;
 }
 
-#header {
+#files-mat-card{
+  width: 500px;
+  margin: 30px auto;
+}
+
+.header {
   text-align: center;
 }
 
-#submitButton {
+.button {
   margin-top: 10px;
   width: 100%;
   background-color: rgb(0,31,91);
@@ -20,6 +26,19 @@ mat-card{
 .full-width-input {
   width: 100%;
 }
+
+mat-spinner{
+  margin: 0 auto;
+}
+
+.flex {
+  margin-top: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
 
 
 
