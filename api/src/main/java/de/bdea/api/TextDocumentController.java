@@ -58,32 +58,22 @@ public class TextDocumentController {
             //
             //Going trough a text Data and filtering all words with less then 4 letters
             //
-            SparkConf conf = new SparkConf().setMaster("local[*]").setAppName("xy");
-            //SparkConf conf = SparkSession.builder().appName("ANewUnitTest").master("local").getOrCreate();
-            
+            SparkConf conf = new SparkConf().setAppName("xy").setMaster("local[*]");
+
             JavaSparkContext sc = new JavaSparkContext(conf);
 
-
-            //saving all words in a List of Array
-            //problem is that \W+ is not working with special characters
-            //therefore they are split into two words and the special characters are ignored
             JavaRDD<String> tokens = sc.textFile(String.valueOf(textFilepath)).flatMap(
                     s -> Arrays.asList(s.split("\\W+")).iterator());
 
-            //filtering all words with less then 4 letters
-            JavaRDD<String> filterer = tokens.filter(new Function<String, Boolean>() {
-                @Override
-                public Boolean call(String s) throws Exception {
-                    return s.length() < 4;
-                }
-            });
+            JavaPairRDD<String, Integer> counts = tokens.mapToPair(
+                    token -> new Tuple2<>(token, 1)).reduceByKey((x, y) -> x + y);
 
-            //counting similar words
-            JavaPairRDD<String, Integer> counts = filterer.mapToPair(
-                    token -> new Tuple2<>(token, 1)).reduceByKey((x, y) -> x+y);
+            Function<Tuple2 <String, Integer>,Boolean> filterFunction = w -> (w._1.length() > 4);
+            JavaPairRDD<String, Integer> rddF = counts.filter(filterFunction);
 
-            List<Tuple2<String, Integer>> results = counts.collect();
+            List<Tuple2<String, Integer>> results = rddF.collect();
             results.forEach(System.out::println);
+            System.out.println("\n");
 
             sc.close();
 
@@ -136,13 +126,13 @@ public class TextDocumentController {
         wordCloud.writeToFile(image.getPath());
         //System.out.print(wordFrequencies);
     }
-    
+
     @GetMapping("/getFiles")
     public String[] getFiles() {
     	String[] strs = {"1","2","3","4"}; // has to be replaced with real names of files
-		return strs; 	
+		return strs;
     }
-    
+
     @GetMapping("/startBatchWork")
     public void startBatchWork() {
     	System.out.println("Batchwork started!!");
