@@ -35,7 +35,7 @@ public class TextDocumentController {
     @Autowired
     private TextDocumentRepository repository;
 
-    @PostMapping("/uploadFile")
+    @PostMapping("/api/uploadFile")
     public boolean addTextDocument(
             @RequestParam("file") MultipartFile file) throws IOException {
 
@@ -86,14 +86,12 @@ public class TextDocumentController {
                 wordFrequencies.add(new WordFrequency(tuple2._1, tuple2._2));
             }
           
-
+            sc.close();
+            
             drawImage(wordFrequencies, Objects.requireNonNull(file.getOriginalFilename()));
             TextDocument test = new TextDocument(file.getOriginalFilename(), wordFrequencies);
-
-            sc.close();
-
             repository.insert(test);
-            drawImage(wordFrequencies, Objects.requireNonNull(file.getOriginalFilename()));
+
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -118,10 +116,10 @@ public class TextDocumentController {
         //System.out.print(wordFrequencies);
     }
 
-    @GetMapping("/getFiles")
+    @GetMapping("/api/getFiles")
     public String[] getFiles() {
-    	repository.findAll();
-    
+    	//repository.findAll();
+    	String[]names = {"1","2","chart"};
 //    	 List<String> strs = new ArrayList<String>();
 //         for (Iterator iterator = tx.iterator(); iterator.hasNext();) {
 //        	TextDocument doc = (TextDocument) iterator.next();
@@ -129,10 +127,10 @@ public class TextDocumentController {
 // 		 }
 //        String [] names = (String[]) strs.toArray();
 //        return names;
-		return null;
+		return names;
     }
 
-    @GetMapping("/startBatchWork")
+    @GetMapping("/api/startBatchWork")
     public void startBatchWork() {
         System.out.println("Batchwork started!!");
         try {

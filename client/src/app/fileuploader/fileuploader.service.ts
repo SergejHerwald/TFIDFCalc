@@ -14,14 +14,14 @@ export class FileuploaderService {
   upload(file:File):Observable<{uploaded: boolean}> {
     const formData: FormData = new FormData();
     formData.append('file', file);
-    return this.http.post<{uploaded: boolean}>(`${this.apiPath}/uploadFile`, formData)
+    return this.http.post<{uploaded: boolean}>(`${this.apiPath}/api/uploadFile`, formData)
   }
 
   getFiles():Observable<string[]> {
-    return this.http.get<string[]>(`${this.apiPath}/getFiles`)
+    return this.http.get<string[]>(`${this.apiPath}/api/getFiles`)
   }
 
   startBatchWork():Observable<any> {
-    return this.http.get<any>(`${this.apiPath}/startBatchWork`)
+    return this.http.get<any>(`${this.apiPath}/api/startBatchWork`)
   }
 }
