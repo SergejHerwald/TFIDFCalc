@@ -5,8 +5,9 @@ import java.io.*;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.kennycason.kumo.CollisionMode;
 import com.kennycason.kumo.WordCloud;
@@ -20,6 +21,7 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,7 +32,7 @@ import scala.Tuple2;
 @RestController
 public class TextDocumentController {
 
-    //	@Autowired
+    @Autowired
     private TextDocumentRepository repository;
 
     @PostMapping("/uploadFile")
@@ -68,14 +70,30 @@ public class TextDocumentController {
             JavaPairRDD<String, Integer> counts = tokens.mapToPair(
                     token -> new Tuple2<>(token, 1)).reduceByKey((x, y) -> x + y);
 
-            Function<Tuple2 <String, Integer>,Boolean> filterFunction = w -> (w._1.length() > 4);
+            Function<Tuple2<String, Integer>, Boolean> filterFunction = w -> (w._1.length() > 4);
             JavaPairRDD<String, Integer> rddF = counts.filter(filterFunction);
+
 
             List<Tuple2<String, Integer>> results = rddF.collect();
             results.forEach(System.out::println);
             System.out.println("\n");
 
+
+            HashMap<String, Integer> hp = new HashMap<String, Integer>();
+
+            for (Iterator iterator = results.iterator(); iterator.hasNext(); ) {
+                Tuple2<String, Integer> tuple2 = (Tuple2<String, Integer>) iterator.next();
+                hp.put(tuple2._1, tuple2._2);
+            }
+
+            System.out.println(hp.toString());
+
+            TextDocument test = new TextDocument(file.getOriginalFilename(), hp);
+
             sc.close();
+
+            repository.insert(test);
+
 
             /*
             Word Count File needs to be in this format to work for Word Cloud
@@ -95,7 +113,7 @@ public class TextDocumentController {
             countFile.getParentFile().mkdirs();
             countFile.createNewFile();
             System.out.println(countFile.getAbsolutePath());
-            drawImage(countFile);
+            //drawImage(results, Objects.requireNonNull(file.getOriginalFilename()));
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -104,9 +122,7 @@ public class TextDocumentController {
         return true;
     }
 
-    private void drawImage(File wordFrequency) throws IOException {
-        final FrequencyFileLoader frequencyFileLoader = new FrequencyFileLoader();
-        final List<WordFrequency> wordFrequencies = frequencyFileLoader.load(wordFrequency);
+    private void drawImage(List<WordFrequency> wordFrequencies, String fileName) throws IOException {
         final Dimension dimension = new Dimension(600, 600);
         final WordCloud wordCloud = new WordCloud(dimension, CollisionMode.PIXEL_PERFECT);
         wordCloud.setPadding(2);
@@ -114,12 +130,7 @@ public class TextDocumentController {
         wordCloud.setColorPalette(new ColorPalette(Color.RED, Color.GREEN, Color.YELLOW, Color.BLUE));
         wordCloud.setFontScalar(new SqrtFontScalar(2, 40));
         wordCloud.build(wordFrequencies);
-        /*
-        TODO
-        name should be Entered name (TextDocument.name)
-         */
-        String name = wordFrequency.getName();
-        File image = new File("./images/"+name.substring(0, name.lastIndexOf('.')) + ".png");
+        File image = new File("./images/" + fileName.substring(0, fileName.lastIndexOf('.')) + ".png");
         image.getParentFile().mkdirs();
         image.createNewFile();
         System.out.println(image.getAbsolutePath());
@@ -129,19 +140,19 @@ public class TextDocumentController {
 
     @GetMapping("/getFiles")
     public String[] getFiles() {
-    	String[] strs = {"1","2","3","4"}; // has to be replaced with real names of files
-		return strs;
+        String[] strs = {"1", "2", "3", "4"}; // has to be replaced with real names of files
+        return strs;
     }
 
     @GetMapping("/startBatchWork")
     public void startBatchWork() {
-    	System.out.println("Batchwork started!!");
-    	try {
-			Thread.sleep(4000);  // only for test
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-    	// TODO: Implementaion of batch work
+        System.out.println("Batchwork started!!");
+        try {
+            Thread.sleep(4000);  // only for test
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        // TODO: Implementaion of batch work
     }
 
 
