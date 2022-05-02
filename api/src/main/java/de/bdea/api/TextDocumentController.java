@@ -85,9 +85,9 @@ public class TextDocumentController {
                 Tuple2<String, Integer> tuple2 = (Tuple2<String, Integer>) iterator.next();
                 wordFrequencies.add(new WordFrequency(tuple2._1, tuple2._2));
             }
-          
+
             sc.close();
-            
+
             drawImage(wordFrequencies, Objects.requireNonNull(file.getOriginalFilename()));
             TextDocument test = new TextDocument(file.getOriginalFilename(), wordFrequencies);
             repository.insert(test);
@@ -119,7 +119,8 @@ public class TextDocumentController {
     @GetMapping("/api/getFiles")
     public String[] getFiles() {
     	//repository.findAll();
-    	String[]names = {"1","2","chart"};
+        String fileName;
+    	List<String> names = new ArrayList<String>();
 //    	 List<String> strs = new ArrayList<String>();
 //         for (Iterator iterator = tx.iterator(); iterator.hasNext();) {
 //        	TextDocument doc = (TextDocument) iterator.next();
@@ -127,7 +128,20 @@ public class TextDocumentController {
 // 		 }
 //        String [] names = (String[]) strs.toArray();
 //        return names;
-		return names;
+        File dir = new File("./textfiles"); // current directory
+        File[] files = dir.listFiles();
+
+        assert files != null;
+        for (File file : files) {
+            fileName = file.getName();
+
+            fileName = fileName.substring(0, fileName.lastIndexOf('.'));
+            names.add(fileName);
+        }
+        Object[] test = names.toArray();
+        System.out.println(test[1]);
+
+		return Arrays.copyOf(test, test.length, String[].class);
     }
 
     @GetMapping("/api/startBatchWork")
