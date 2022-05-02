@@ -79,41 +79,21 @@ public class TextDocumentController {
             System.out.println("\n");
 
 
-            HashMap<String, Integer> hp = new HashMap<String, Integer>();
+            List<WordFrequency> wordFrequencies = new ArrayList<WordFrequency>();
 
             for (Iterator iterator = results.iterator(); iterator.hasNext(); ) {
                 Tuple2<String, Integer> tuple2 = (Tuple2<String, Integer>) iterator.next();
-                hp.put(tuple2._1, tuple2._2);
+                wordFrequencies.add(new WordFrequency(tuple2._1, tuple2._2));
             }
+          
 
-            System.out.println(hp.toString());
-
-            TextDocument test = new TextDocument(file.getOriginalFilename(), hp);
+            drawImage(wordFrequencies, Objects.requireNonNull(file.getOriginalFilename()));
+            TextDocument test = new TextDocument(file.getOriginalFilename(), wordFrequencies);
 
             sc.close();
 
             repository.insert(test);
-
-
-            /*
-            Word Count File needs to be in this format to work for Word Cloud
-                    100: frog
-                    94: dog
-                    43: cog
-                    20: bog
-                    3: fog
-                    1: log
-                    1: pog
-            TODO
-            file.getOriginalFilename() should be Entered name (TextDocument.name)
-             */
-            Path dir_count = Path.of("./count/");
-            Path countFilepath = Paths.get(dir_count.toString(), file.getOriginalFilename());
-            File countFile = new File(String.valueOf(countFilepath));
-            countFile.getParentFile().mkdirs();
-            countFile.createNewFile();
-            System.out.println(countFile.getAbsolutePath());
-            //drawImage(results, Objects.requireNonNull(file.getOriginalFilename()));
+            drawImage(wordFrequencies, Objects.requireNonNull(file.getOriginalFilename()));
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -130,7 +110,7 @@ public class TextDocumentController {
         wordCloud.setColorPalette(new ColorPalette(Color.RED, Color.GREEN, Color.YELLOW, Color.BLUE));
         wordCloud.setFontScalar(new SqrtFontScalar(2, 40));
         wordCloud.build(wordFrequencies);
-        File image = new File("./images/" + fileName.substring(0, fileName.lastIndexOf('.')) + ".png");
+        File image = new File("./src/main/webapp/WEB-INF/images/" + fileName.substring(0, fileName.lastIndexOf('.')) + ".png");
         image.getParentFile().mkdirs();
         image.createNewFile();
         System.out.println(image.getAbsolutePath());
@@ -140,8 +120,16 @@ public class TextDocumentController {
 
     @GetMapping("/getFiles")
     public String[] getFiles() {
-        String[] strs = {"1", "2", "3", "4"}; // has to be replaced with real names of files
-        return strs;
+    	repository.findAll();
+    
+//    	 List<String> strs = new ArrayList<String>();
+//         for (Iterator iterator = tx.iterator(); iterator.hasNext();) {
+//        	TextDocument doc = (TextDocument) iterator.next();
+// 			strs.add(doc.getName());
+// 		 }
+//        String [] names = (String[]) strs.toArray();
+//        return names;
+		return null;
     }
 
     @GetMapping("/startBatchWork")

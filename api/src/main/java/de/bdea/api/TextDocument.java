@@ -1,6 +1,9 @@
 package de.bdea.api;
 
 import java.util.HashMap;
+import java.util.List;
+
+import com.kennycason.kumo.WordFrequency;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -13,9 +16,9 @@ public class TextDocument {
 
     private String name;
 
-    private HashMap<String, Integer> wordCounter;
+    private List<WordFrequency> wordCounter;
 
-    public TextDocument(String name, HashMap<String,Integer> wordCounter) {
+    public TextDocument(String name, List<WordFrequency> wordCounter) {
         this.name = name;
         this.wordCounter = wordCounter;
     }
