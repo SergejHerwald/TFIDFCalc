@@ -58,11 +58,12 @@ public class TextDocumentController {
             file.transferTo(textFilepath);
 
             // TF:
-            // going through text Data, counting and filtering all words with more than 4 letters
+            // going through text Data, turning every word to lower case to reduce word doubles
+            // counting and filtering all words with more than 4 letters
             SparkConf conf = new SparkConf().setAppName("xy").setMaster("local[*]");
             JavaSparkContext sc = new JavaSparkContext(conf);
             JavaRDD<String> tokens = sc.textFile(String.valueOf(textFilepath)).flatMap(
-                    s -> Arrays.asList(s.split("\\W+")).iterator());
+                    s -> Arrays.asList(s.toLowerCase().split("[^\\S\\r\\n]")).iterator());
             JavaPairRDD<String, Integer> counts = tokens.mapToPair(
                     token -> new Tuple2<>(token, 1)).reduceByKey(Integer::sum);
 
