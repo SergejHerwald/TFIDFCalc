@@ -36,7 +36,7 @@ public class TextDocumentController {
     private static final int padding = 4;
     private static final ColorPalette colors = new ColorPalette(Color.RED, Color.GREEN, Color.YELLOW, Color.BLUE);
     private static final CircleBackground backGround = new CircleBackground(300);
-    private static final SqrtFontScalar fontScalar = new SqrtFontScalar(2, 100);
+    private static final SqrtFontScalar fontScalar = new SqrtFontScalar(2, 70);
 
     @Autowired
     private TextDocumentRepository tfRepository;
@@ -111,7 +111,6 @@ public class TextDocumentController {
         image.getParentFile().mkdirs();
         image.createNewFile();
         wordCloud.writeToFile(image.getPath());
-        //TODO: refresh page
     }
 
     @GetMapping("/api/getFiles")
@@ -156,7 +155,17 @@ public class TextDocumentController {
         String[] allFiles  = getFiles();
         for (String file : allFiles) {
             Map<String, Integer> tf = tfRepository.findByName(file + ".txt").getWordCounter();
-            drawImage(mapToWF(tf), file+ ".png");
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        drawImage(mapToWF(tf), file+ ".png");
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }).start();
+
         }
         // global Tag-Cloud:
         drawImage(mapToWF(allTF), "global_Tag_Cloud.png");
