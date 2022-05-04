@@ -53,6 +53,7 @@ export class FileuploaderComponent implements OnInit {
       this.uploadStarted = false;
       this.uploadFormValid = true;
       this.okPopUp("File uploaded")
+      this.fileuploaderService.getFiles().subscribe((files)=>{this.files = files})
     },()=>{
       this.uploadStarted = false;
       this.uploadFormValid = true;

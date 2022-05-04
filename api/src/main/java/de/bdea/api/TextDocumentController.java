@@ -36,7 +36,7 @@ public class TextDocumentController {
     private static final int padding = 4;
     private static final ColorPalette colors = new ColorPalette(Color.RED, Color.GREEN, Color.YELLOW, Color.BLUE);
     private static final CircleBackground backGround = new CircleBackground(300);
-    private static final SqrtFontScalar fontScalar = new SqrtFontScalar(40, 100);
+    private static final SqrtFontScalar fontScalar = new SqrtFontScalar(2, 100);
 
     @Autowired
     private TextDocumentRepository tfRepository;
@@ -73,7 +73,7 @@ public class TextDocumentController {
             SparkConf conf = new SparkConf().setAppName("xy").setMaster("local[*]");
             JavaSparkContext sc = new JavaSparkContext(conf);
             JavaRDD<String> tokens = sc.textFile(String.valueOf(textFilepath)).flatMap(
-                    s -> Arrays.asList(s.toLowerCase().split("[^\\S\\r\\n]")).iterator());
+                    s -> Arrays.asList(s.toLowerCase().replace(".","").split("[^\\S\\r\\n]")).iterator());
             JavaPairRDD<String, Integer> counts = tokens.mapToPair(
                     token -> new Tuple2<>(token, 1)).reduceByKey(Integer::sum);
             Function<Tuple2<String, Integer>, Boolean> filterFunction = w -> (w._1.length() > 4);
@@ -84,10 +84,10 @@ public class TextDocumentController {
             // saves TF in DB for later usage
             TextDocument textDocument = new TextDocument(fileName, resultsMap);
             if(tfRepository.findByName(fileName) == null){
-                tfRepository.save(textDocument);
+                tfRepository.insert(textDocument);
             }else{
                 tfRepository.delete(tfRepository.findByName(fileName));
-                tfRepository.save(textDocument);
+                tfRepository.insert(textDocument);
             }
 
             // creating Tag-Cloud
