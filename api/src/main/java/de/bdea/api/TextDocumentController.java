@@ -15,6 +15,7 @@ import com.kennycason.kumo.WordFrequency;
 import com.kennycason.kumo.bg.CircleBackground;
 import com.kennycason.kumo.font.scale.SqrtFontScalar;
 import com.kennycason.kumo.palette.ColorPalette;
+import org.apache.hadoop.yarn.webapp.hamlet2.Hamlet;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -35,7 +36,7 @@ public class TextDocumentController {
     private static final int padding = 4;
     private static final ColorPalette colors = new ColorPalette(Color.RED, Color.GREEN, Color.YELLOW, Color.BLUE);
     private static final CircleBackground backGround = new CircleBackground(300);
-    private static final SqrtFontScalar fontScalar = new SqrtFontScalar(2, 40);
+    private static final SqrtFontScalar fontScalar = new SqrtFontScalar(40, 100);
 
     @Autowired
     private TextDocumentRepository tfRepository;
@@ -62,10 +63,8 @@ public class TextDocumentController {
             String fileName = Objects.requireNonNull(file.getOriginalFilename());
             Path textFilepath = Paths.get(dir_textfiles.toString(), fileName);
             File textFile = new File(String.valueOf(textFilepath));
-            System.out.println(textFile.getPath());
             textFile.getParentFile().mkdirs();
             textFile.createNewFile();
-            System.out.println(textFile.getAbsolutePath());
             file.transferTo(textFilepath);
 
             // TF:
@@ -80,8 +79,6 @@ public class TextDocumentController {
             Function<Tuple2<String, Integer>, Boolean> filterFunction = w -> (w._1.length() > 4);
             JavaPairRDD<String, Integer> rddF = counts.filter(filterFunction);
             List<Tuple2<String, Integer>> results = rddF.collect();
-            results.forEach(System.out::println);
-            System.out.println("\n");
             sc.close();
             Map<String, Integer> resultsMap = results.stream().collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
             // saves TF in DB for later usage
@@ -94,16 +91,7 @@ public class TextDocumentController {
             }
 
             // creating Tag-Cloud
-            //System.out.println(mapToWF(resultsMap));
             drawImage(mapToWF(resultsMap), fileName);
-
-
-            List<TextDocument> t = tfRepository.findAll();
-            for (TextDocument textD : t) {
-                System.out.println(textD.getName());
-            }
-
-            // TODO: refresh list with Tag Clouds frontend
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -123,6 +111,7 @@ public class TextDocumentController {
         image.getParentFile().mkdirs();
         image.createNewFile();
         wordCloud.writeToFile(image.getPath());
+        //TODO: refresh page
     }
 
     @GetMapping("/api/getFiles")
@@ -140,46 +129,38 @@ public class TextDocumentController {
     @GetMapping("/api/startBatchWork")
     public void startBatchWork() throws IOException {
         System.out.println("Batchwork started!!");
-        // TODO: Implementaion of batch work
         // get DF as ArrayList out of DB
         DocumentFrequency df = dfRepository.findByName(dfName);
         // get all TF out of DB
         List<TextDocument> documents = tfRepository.findAll();
-        List<String> allTF = new ArrayList<>();
+        Map<String, Integer> allTF = new HashMap<>();
+        List<String> allWord = new ArrayList<>();
         for (TextDocument text:documents) {
-            allTF.addAll(text.getWordCounter().keySet());
+            allWord.addAll(text.getWordCounter().keySet());
+            // all TF in one ArrayList globalTF (if same Word, add frequency together)
+            text.getWordCounter().forEach((key, value) ->
+                    allTF.merge(key, value, Integer::sum) );
         }
 
         SparkConf conf = new SparkConf().setAppName("xy").setMaster("local[*]");
         JavaSparkContext sc = new JavaSparkContext(conf);
-        JavaRDD<String> words = sc.parallelize(allTF);
+        JavaRDD<String> words = sc.parallelize(allWord);
         JavaPairRDD<String, Integer> counts =
                 words.mapToPair(token -> new Tuple2<>(token, 1)).reduceByKey(Integer::sum);
-        Function<Tuple2<String, Integer>, Boolean> filterFunction = w -> (w._1.length() > 4);
-        JavaPairRDD<String, Integer> rddF = counts.filter(filterFunction);
-        List<Tuple2<String, Integer>> results = rddF.collect();
+        List<Tuple2<String, Integer>> results = counts.collect();
         Map<String, Integer> resultsMap = results.stream().collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
         // Update DF in DB
+        dfRepository.delete(dfRepository.findByName(dfName));
         dfRepository.insert(new DocumentFrequency(resultsMap,dfName));
-        sc.close();
-
         // Redo all Tag-Clouds with TF (already out of DB) and new DF
         String[] allFiles  = getFiles();
-
-
-
-
-
-
-
-
-        //
+        for (String file : allFiles) {
+            Map<String, Integer> tf = tfRepository.findByName(file + ".txt").getWordCounter();
+            drawImage(mapToWF(tf), file+ ".png");
+        }
         // global Tag-Cloud:
-        // all TF in one ArrayList globalTF (if same Word, add frequency together)
-
-        // create global Tag-Cloud with globalTF and new DF
-        // store in File image = new File("./src/main/webapp/WEB-INF/images/global Tag Cloud.png");
-
+        drawImage(mapToWF(allTF), "global_Tag_Cloud.png");
+        sc.close();
     }
     private List<WordFrequency> mapToWF(Map<String, Integer> resultsMap){
         List<WordFrequency> wordFrequencies = new ArrayList<>();
@@ -193,7 +174,7 @@ public class TextDocumentController {
         DocumentFrequency df = dfRepository.findByName(dfName);
         Map<String, Integer> dfMap = df.getWordCounter();
         if(dfMap.containsKey(word)){
-            return (int)Math.log(dfMap.get(word));
+            return dfMap.get(word);
         }
         return 1;
     }
