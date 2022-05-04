@@ -53,7 +53,10 @@ export class FileuploaderComponent implements OnInit {
       this.uploadStarted = false;
       this.uploadFormValid = true;
       this.okPopUp("File uploaded")
-      this.fileuploaderService.getFiles().subscribe((files)=>{this.files = files})
+      this.fileuploaderService.getFiles().subscribe((files)=>{
+        this.files = files
+        this.batchWorkValid = this.files.length != 0;
+      })
     },()=>{
       this.uploadStarted = false;
       this.uploadFormValid = true;
@@ -118,5 +121,8 @@ export class FileuploaderComponent implements OnInit {
   }
 
 
-
+  getGlobalImage() {
+    this.url = `${this.apiPath}/images/global_Tag_Cloud.png`;
+    this.imageLoaded = true;
+  }
 }

@@ -37,7 +37,7 @@
 
 
   <mat-card id="files-mat-card">
-    <form [formGroup]="this.getCloudform" (ngSubmit)="getImage()">
+    <form [formGroup]="this.getCloudform">
       <div class="header">
         <h2>Tag Cloud</h2>
       </div>
@@ -57,8 +57,16 @@
           color="primary"
           class="button"
           [disabled]="!this.fileSelected"
+          (click)="getImage()"
         >
           GET CLOUD</button>
+        <button
+          mat-raised-button
+          color="primary"
+          class="button"
+          (click)="getGlobalImage()"
+        >
+          GET GLOBAL CLOUD</button>
       </mat-dialog-actions>
 
     </form>

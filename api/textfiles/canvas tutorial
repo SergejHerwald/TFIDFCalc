@@ -1,0 +1,52 @@
+function draw(){
+    let canvas = document.getElementById("canvas-board");
+    if(canvas.getContext){
+        let ctx = canvas.getContext("2d");
+    } else {
+    	alert(...);
+    }
+  ...........
+  
+  
+}
+
+//filled Rectangle
+ctx.fillStyle = rgb || rgba || #...
+ctx.fillRect(x,y,width,height)
+
+//stroked Rectangle
+ctx.strokeStyle = ''
+ctx.strokeRect(x, y, width, height);
+
+//clear Rectangle
+ctx.clearRect(x, y, width, height);
+
+
+// line
+ctx.beginPath();
+ctx.strokeStyle = ''
+ctx.moveTo(x,y)
+ctx.lineTo(x,y)
+ctx.stroke()
+
+
+beginPath() Erstellt einen Pfad und beendet ggf. einen älteren.
+closePath() Beendet den Pfad und verbindet den Startpunkt mit dem Endpunkt.
+stroke() Zeichnet die Kontur des Pfades.
+fill() Zeichnet die Füllung des Pfades.
+lineTo(x, y) Zeichnet eine Linie von der aktuellen Stiftposition zu dem Punkt (x, y)
+arc(x, y, radius, startWinkel, endWinkel, uhrzeigersinn) Zeichnet einen Kreisbogen. 
+quadraticCurveTo(cp1x, cp1y, x, y) - Zeichnet eine quadratische Bézierkurve von der 
+				     aktuellen Stiftposition zu x und y, mithilfe des 
+				     Kontrollpunktes mit den Koordinaten (cp1x, cp1y)
+				     
+
+
+drawImage(image, x, y) - Draws the CanvasImageSource specified by the image parameter 
+				     at the coordinates (x, y).
+				     
+
+
+
+was gepl, wieso?
+js oder angular
