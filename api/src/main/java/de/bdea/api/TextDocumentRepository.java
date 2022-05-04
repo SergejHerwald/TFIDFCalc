@@ -13,6 +13,7 @@ import java.util.function.Function;
 
 
 public interface TextDocumentRepository extends MongoRepository<TextDocument, String> {
+    public TextDocument findByName(String name);
 
 }
 

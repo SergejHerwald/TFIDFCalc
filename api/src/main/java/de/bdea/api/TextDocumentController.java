@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.kennycason.kumo.CollisionMode;
 import com.kennycason.kumo.WordCloud;
@@ -37,7 +38,11 @@ public class TextDocumentController {
     private static final SqrtFontScalar fontScalar = new SqrtFontScalar(2, 40);
 
     @Autowired
-    private TextDocumentRepository repository;
+    private TextDocumentRepository tfRepository;
+    @Autowired
+    private DocumentFrequencyRepository dfRepository;
+    private final String dfName = "DF";
+
 
     @PostMapping("/api/uploadFile")
     public boolean addTextDocument(
@@ -45,6 +50,12 @@ public class TextDocumentController {
 
 
         try {
+            // initial creation of  DF in DB
+            if(dfRepository.findByName(dfName) == null){
+                Map<String, Integer> m = new HashMap<>();
+                dfRepository.insert(new DocumentFrequency(m,dfName));
+            }
+
             // store textfiles in file system
             Path dir_textfiles = Path.of("./textfiles/");
             InputStream stream = file.getInputStream();
@@ -66,29 +77,31 @@ public class TextDocumentController {
                     s -> Arrays.asList(s.toLowerCase().split("[^\\S\\r\\n]")).iterator());
             JavaPairRDD<String, Integer> counts = tokens.mapToPair(
                     token -> new Tuple2<>(token, 1)).reduceByKey(Integer::sum);
-
             Function<Tuple2<String, Integer>, Boolean> filterFunction = w -> (w._1.length() > 4);
             JavaPairRDD<String, Integer> rddF = counts.filter(filterFunction);
             List<Tuple2<String, Integer>> results = rddF.collect();
             results.forEach(System.out::println);
             System.out.println("\n");
             sc.close();
+            Map<String, Integer> resultsMap = results.stream().collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
+            // saves TF in DB for later usage
+            TextDocument textDocument = new TextDocument(fileName, resultsMap);
+            if(tfRepository.findByName(fileName) == null){
+                tfRepository.save(textDocument);
+            }else{
+                tfRepository.delete(tfRepository.findByName(fileName));
+                tfRepository.save(textDocument);
+            }
 
             // creating Tag-Cloud
-            List<WordFrequency> wordFrequencies = new ArrayList<>();
-            List<WordFrequency> tf = new ArrayList<>();
-            for (Tuple2<String, Integer> tuple2 : results) {
-                tf.add(new WordFrequency(tuple2._1, tuple2._2));
-                // TODO: tuple2._2 / log(DF); if DF = 0, tuple2._2 / 1
-                // Need DF!!!!
-                int t2 = tuple2._2;
-                wordFrequencies.add(new WordFrequency(tuple2._1, t2));
-            }
-            drawImage(wordFrequencies, fileName);
+            //System.out.println(mapToWF(resultsMap));
+            drawImage(mapToWF(resultsMap), fileName);
 
-            // saves TF in DB for later usage
-            TextDocument textDocument = new TextDocument(file.getOriginalFilename(), tf);
-            repository.insert(textDocument);
+
+            List<TextDocument> t = tfRepository.findAll();
+            for (TextDocument textD : t) {
+                System.out.println(textD.getName());
+            }
 
             // TODO: refresh list with Tag Clouds frontend
 
@@ -114,53 +127,37 @@ public class TextDocumentController {
 
     @GetMapping("/api/getFiles")
     public String[] getFiles() {
-        // TODO: need cleanup
-        //repository.findAll();
-        String fileName;
+        List<TextDocument> textDocuments = tfRepository.findAll();
         List<String> names = new ArrayList<String>();
-//    	 List<String> strs = new ArrayList<String>();
-//         for (Iterator iterator = tx.iterator(); iterator.hasNext();) {
-//        	TextDocument doc = (TextDocument) iterator.next();
-// 			strs.add(doc.getName());
-// 		 }
-//        String [] names = (String[]) strs.toArray();
-//        return names;
-        File dir = new File("./textfiles"); // current directory
-        File[] files = dir.listFiles();
-
-        assert files != null;
-        for (File file : files) {
-            fileName = file.getName();
-
-            fileName = fileName.substring(0, fileName.lastIndexOf('.'));
-            names.add(fileName);
+        for (TextDocument t : textDocuments) {
+            String name = t.getName();
+            name = name.substring(0, name.lastIndexOf('.'));
+            names.add(name);
         }
-        Object[] test = names.toArray();
-        System.out.println(test[1]);
-
-        return Arrays.copyOf(test, test.length, String[].class);
+        return names.toArray(String[]::new);
     }
 
     @GetMapping("/api/startBatchWork")
-    public void startBatchWork() {
+    public void startBatchWork() throws IOException {
         System.out.println("Batchwork started!!");
-        try {
-            Thread.sleep(4000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        // TODO: Implementaion of batch work
-        // get DF as ArrayList out of DB (or create if none exists)
-        // get all TF out of DB
-        // add or increase DF for Words from all TF
-        // Update DF in DB
-        // Redo all Tag-Clouds with TF (already out of DB) and new DF
-        //
-        // global Tag-Cloud:
-        // all TF in one ArrayList globalTF (if same Word, add frequency together)
-        // create global Tag-Cloud with globalTF and new DF
-        // store in File image = new File("./src/main/webapp/WEB-INF/images/global Tag Cloud.png");
-    }
 
+
+    }
+    private List<WordFrequency> mapToWF(Map<String, Integer> resultsMap){
+        List<WordFrequency> wordFrequencies = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : resultsMap.entrySet()) {
+            int df = getDF(entry.getKey());
+            wordFrequencies.add(new WordFrequency(entry.getKey(),entry.getValue()/getDF(entry.getKey())));
+        }
+        return wordFrequencies;
+    }
+    private int getDF(String word){
+        DocumentFrequency df = dfRepository.findByName(dfName);
+        Map<String, Integer> dfMap = df.getWordCounter();
+        if(dfMap.containsKey(word)){
+            return (int)Math.log(dfMap.get(word));
+        }
+        return 1;
+    }
 
 }
