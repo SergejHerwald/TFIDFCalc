@@ -141,13 +141,12 @@ public class TextDocumentController {
     public void startBatchWork() throws IOException {
         System.out.println("Batchwork started!!");
         // TODO: Implementaion of batch work
-        // get DF as ArrayList out of DB (or create if none exists)
+        // get DF as ArrayList out of DB
         DocumentFrequency df = dfRepository.findByName(dfName);
         // get all TF out of DB
         List<TextDocument> documents = tfRepository.findAll();
         List<String> allTF = new ArrayList<>();
         for (TextDocument text:documents) {
-
             allTF.addAll(text.getWordCounter().keySet());
         }
 
@@ -159,41 +158,21 @@ public class TextDocumentController {
         Function<Tuple2<String, Integer>, Boolean> filterFunction = w -> (w._1.length() > 4);
         JavaPairRDD<String, Integer> rddF = counts.filter(filterFunction);
         List<Tuple2<String, Integer>> results = rddF.collect();
-        System.out.println("DF:");
-        results.forEach(System.out::println);
-        System.out.println("\n");
+        Map<String, Integer> resultsMap = results.stream().collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
+        // Update DF in DB
+        dfRepository.insert(new DocumentFrequency(resultsMap,dfName));
         sc.close();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // Update DF in DB
         // Redo all Tag-Clouds with TF (already out of DB) and new DF
-/*        String[] allFiles = null;
-        List<WordFrequency> tf = new ArrayList<>();
-        List<Tuple2<String, Integer>> results = null;
-        List<WordFrequency> wordFrequencies = new ArrayList<>();
-        for (String f : allFiles) {
-            assert results != null;
-            for (Tuple2<String, Integer> tuple2 : results) {
-                tf.add(new WordFrequency(tuple2._1, tuple2._2));
-                // TODO: tuple2._2 / log(DF); if DF = 0, tuple2._2 / 1
-                // Need DF!!!!
-                int t2 = tuple2._2;
-                wordFrequencies.add(new WordFrequency(tuple2._1, t2));
-            }
-            //drawImage(wordFrequencies, f);
-        }*/
+        String[] allFiles  = getFiles();
+
+
+
+
+
+
+
+
         //
         // global Tag-Cloud:
         // all TF in one ArrayList globalTF (if same Word, add frequency together)
